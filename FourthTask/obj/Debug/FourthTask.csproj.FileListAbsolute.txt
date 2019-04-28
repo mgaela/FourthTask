@@ -1,0 +1,7 @@
+D:\学习\FourthTask\FourthTask\obj\Debug\FourthTask.csprojAssemblyReference.cache
+D:\学习\FourthTask\FourthTask\obj\Debug\FourthTask.csproj.CoreCompileInputs.cache
+D:\学习\FourthTask\FourthTask\bin\Debug\FourthTask.exe.config
+D:\学习\FourthTask\FourthTask\bin\Debug\FourthTask.exe
+D:\学习\FourthTask\FourthTask\bin\Debug\FourthTask.pdb
+D:\学习\FourthTask\FourthTask\obj\Debug\FourthTask.exe
+D:\学习\FourthTask\FourthTask\obj\Debug\FourthTask.pdb
