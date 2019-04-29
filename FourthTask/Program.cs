@@ -11,10 +11,13 @@ namespace FourthTask
 {
     class Program
     {
+        private static readonly object ForLock = new object();
         static void Main(string[] args)
         {
             var Program = new Program();
-            Program.StoryStart();
+            //Program.StoryStart();
+            //ConsoleCharacter("能行吗，就这么点代码");
+            Testparallel();
             Console.ReadLine();
         }
         #region Data
@@ -54,17 +57,17 @@ namespace FourthTask
                             return;
                         }
                         i++;
-                        Console.WriteLine(item.Name + plot);
+                        ConsoleCharacter(item.Name + plot+"!");
                         if (i == 1 && !HasFirst)
                         {
                             HasFirst = true;
-                            Console.WriteLine("天龙八部就此拉开序幕");
+                            ConsoleCharacter("天龙八部就此拉开序幕");
                         }
                     }
                     if (!HasEnd && !cts.IsCancellationRequested)
                     {
                         HasEnd = true;
-                        Console.WriteLine(item.Name,"已经做好准备了。。。。。");
+                        ConsoleCharacter(item.Name+"已经做好准备了。。。。。");
                     }
                 }));
             }
@@ -147,24 +150,80 @@ namespace FourthTask
                 {
                     Thread.Sleep(new RandomHelper().GetRandomNumber(1500, 2500));//随机休息一下
                     var currentYear = new Random().Next(0, 10000);
-                    Console.WriteLine("灭世年份:"+ currentYear);
+                    ConsoleCharacter("灭世年份:"+ currentYear);
                     if (currentYear==2019)
                     {
-                        Console.WriteLine("天降雷霆灭世，天龙八部的故事就此结束....");
+                        ConsoleCharacter("天降雷霆灭世，天龙八部的故事就此结束....");
                         cts.Cancel();
                     }
                 }
             },cts.Token);
-            //Story.ContinueWhenAny(PlotList.ToArray(), t => Console.WriteLine("天龙八部就此拉开序幕"));
+            //Story.ContinueWhenAny(PlotList.ToArray(), t => ConsoleCharacter("天龙八部就此拉开序幕"));
             Story.ContinueWhenAll(PlotList.ToArray(), t => {
                 if (!cts.IsCancellationRequested)
                 {
-                    Console.WriteLine("中原群雄大战辽兵，忠义两难一死谢天！");
+                    ConsoleCharacter("中原群雄大战辽兵，忠义两难一死谢天！");
                 }
                 stopwatch.Stop();
-                Console.WriteLine(stopwatch.ElapsedMilliseconds);
+                ConsoleCharacter("总用时"+stopwatch.ElapsedMilliseconds);
             });
         }
         #endregion
+        public static void ConsoleCharacter(string chars)
+        {
+            lock (ForLock)
+            {
+                foreach (var item in chars)
+                {
+                    Console.Write(item);
+                    Thread.Sleep(300);
+                }
+                Console.WriteLine();
+            }
+        }
+        public static void Testparallel()
+        {
+            //Action<int> action = new Action<int>((a) =>
+            //{
+            //    Console.WriteLine("Obj"+a+"using "+Thread.CurrentThread.ManagedThreadId.ToString("00"));
+            //    Thread.Sleep(1000);
+            //});
+            ////parallelOptions 可以控制并发数量
+            //ParallelOptions parallelOptions = new ParallelOptions();
+            //parallelOptions.MaxDegreeOfParallelism = 10;
+            //Parallel.For(0,1000, action);
+
+
+            {
+                //List<int> list = new List<int>();
+                //for (int i = 0; i < 10000; i++)
+                //{
+                //    list.Add(i);
+                //}
+                //完成10000个任务  但是只要11个线程  
+                Action<int> action = i =>
+                {
+                    Console.WriteLine(Thread.CurrentThread.ManagedThreadId.ToString("00"));
+                    Thread.Sleep(new Random(i).Next(100, 300));
+                };
+                List<Task> taskList = new List<Task>();
+                for (int i = 0; i < 10000; i++)
+                {
+
+                //}
+                //foreach (var i in list)
+                //{
+                    int k = i;
+                    taskList.Add(Task.Run(() => action.Invoke(k)));
+                    if (taskList.Count > 5)
+                    {
+                        Task.WaitAny(taskList.ToArray());
+                        taskList = taskList.Where(t => t.Status != TaskStatus.RanToCompletion).ToList();
+                    }
+                }
+                Task.WhenAll(taskList.ToArray());
+            }
+        }
+
     }
 }
